@@ -53,6 +53,12 @@ Everything done on this project, in order, so it can be explained on the page (w
     "what a project like this takes" section, the name of the book being studied) were removed. The system design sits
     above "How this was made". Results, pictures and a "Not done yet" note were added with the finished model.
 
+17. **Results moved up, example picture redone.** Clark: the results took too much of the page, and the guesses in the
+    example picture were almost all wrong. Results now sit right under the demo in a compact grid. The old picture
+    showed the top guess at random steps (right 43% of the time, so mostly misses). `examples.py` now picks random
+    test cases where the model was at least 50% sure (it is right on 77% of those; 7 of the 8 shown matched), and the
+    caption says so. The overall 43% stays on the score bars.
+
 ## Things that went wrong
 - The pod image lacked rsync and the data reader's extras (matplotlib, lz4); installed by hand.
 - prep.py first used 96 worker processes because the machine reports 128 processors, but the pod only gets about 18.

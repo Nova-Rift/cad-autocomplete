@@ -54,36 +54,7 @@ def frame(ax):
         s.set_color("#d9dde3")
 
 
-# ---- example guesses ----
-ck = torch.load(f"{run}/best.pt", map_location="cuda")
-model = SketchGPT(**ck["cfg"]).cuda().eval(); model.load_state_dict(ck["state"])
-rows = np.load(f"{data}/test.npy")
-rng = np.random.default_rng(3)
-picks = []
-for row in rows[rng.permutation(len(rows))]:
-    ents = split_entities(row)
-    if 4 <= len(ents) <= 12:
-        picks.append((row, ents, int(rng.integers(2, len(ents)))))
-    if len(picks) == 12:
-        break
-fig, axes = plt.subplots(3, 8, figsize=(16, 6.4))
-for i, (row, ents, k) in enumerate(picks):
-    n = 1 + sum(1 + len(c) for _, c in ents[:k])
-    guess = next_shapes(model, torch.from_numpy(row[:n].astype(np.int64))[None].cuda(), 5)[0][0][1]
-    truth = ents[k]
-    got = None if guess[0] == EOS else (guess[0], [x - COORD0 for x in guess[1:]])
-    right = got is not None and canonical(got) == canonical(truth)
-    a, b = axes[i // 4][(i % 4) * 2], axes[i // 4][(i % 4) * 2 + 1]
-    for ax, extra, color, ghost in ((a, got, BLUE, True), (b, truth, GREEN if right else RED, False)):
-        frame(ax)
-        for e in ents[:k]:
-            draw(ax, e, HELP if e[0] > POINT else INK)
-        if extra:
-            draw(ax, extra, color, lw=3, ghost=ghost)
-    a.set_title("model's guess" if got else "model: finished", fontsize=10, color=BLUE)
-    b.set_title("what the person drew", fontsize=10, color=GREEN if right else RED)
-fig.tight_layout()
-fig.savefig(f"{out}/examples.png", dpi=110); plt.close(fig)
+# ---- example guesses: see examples.py (python examples.py TOKENS RUN/best.pt docs/examples.png) ----
 
 # ---- score bars ----
 ev = json.load(open(f"{run}/eval.json"))
