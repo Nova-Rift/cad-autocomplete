@@ -131,7 +131,9 @@ class Model {
   }
 
   // Best few guesses for the next shape: [{p, tokens}] best first. tokens [EOS] means "looks finished".
-  suggest(tokens, width = 5) {
+  // forced: {position in the new shape: token} for parts the person has already fixed by clicking (0 = the kind of
+  // shape, 1.. = its coordinates). Those positions are taken as given, and p is the chance of the rest.
+  suggest(tokens, width = 5, forced = {}) {
     const first = this.read(tokens);
     const logSoftmax = (logits, lo, hi, extra) => {
       let top = -Infinity;
@@ -146,7 +148,7 @@ class Model {
       return out;
     };
     const room = tokens.length + 7 <= BLOCK;
-    let beams = logSoftmax(first, FIRST_TYPE, LAST_TYPE, EOS)
+    let beams = (forced[0] !== undefined ? [[forced[0], 0]] : logSoftmax(first, FIRST_TYPE, LAST_TYPE, EOS))
       .filter(([t]) => t === EOS || room)
       .sort((a, b) => b[1] - a[1]).slice(0, width)
       .map(([t, lp]) => ({ lp, toks: [t], left: t === EOS ? 0 : nCoords(t), memory: null }));
@@ -156,7 +158,8 @@ class Model {
         if (b.left === 0) { next.push(b); continue; }
         const memory = this.cloneMemory(b.memory || this.memory);
         const logits = this.step(b.toks[b.toks.length - 1], tokens.length + b.toks.length - 1, memory);
-        for (const [t, lp] of logSoftmax(logits, COORD0, VOCAB - 1))
+        const fixed = forced[b.toks.length];
+        for (const [t, lp] of fixed !== undefined ? [[fixed, 0]] : logSoftmax(logits, COORD0, VOCAB - 1))
           next.push({ lp: b.lp + lp, toks: [...b.toks, t], left: b.left - 1, memory });
       }
       beams = next.sort((a, b) => b.lp - a.lp).slice(0, width);

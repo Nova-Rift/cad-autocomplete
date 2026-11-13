@@ -1,7 +1,15 @@
 <div class="sk">
   <div class="sk-wrap">
     <div class="sk-stage">
-      <canvas id="board" width="1280" height="1280"></canvas>
+      <div class="sk-board">
+        <div class="sk-pick" id="pick" hidden>
+          <button id="prev" aria-label="Previous guess">‹</button>
+          <span id="pick-label"></span>
+          <button id="next" aria-label="Next guess">›</button>
+          <button id="take">Take it <kbd>Tab</kbd></button>
+        </div>
+        <canvas id="board" width="1280" height="1280"></canvas>
+      </div>
       <div id="status">Loading the model…</div>
     </div>
     <div class="sk-side">
@@ -22,7 +30,8 @@
       <div class="sk-card">
         <h2>Next shape guesses</h2>
         <div id="suggestions"><p class="sk-hint">Draw something to get a guess.</p></div>
-        <p class="sk-hint sk-keys"><kbd>Tab</kbd> take it · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pick another · <kbd>Esc</kbd> stop drawing</p>
+        <p class="sk-hint sk-keys"><kbd>Tab</kbd> take it · <kbd>←</kbd> <kbd>→</kbd> or <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> switch · <kbd>Esc</kbd> stop drawing</p>
+        <p class="sk-hint" style="margin-top:6px">Click to start a shape and the guesses change to finish it for you.</p>
       </div>
       <div class="sk-card">
         <h2>Start from</h2>
