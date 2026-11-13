@@ -52,12 +52,12 @@ html[data-theme="dark"] .sk { --sk-panel:#2c2739; --sk-ink:#eee9f5; --sk-dim:#bf
 .sk .sk-step p b { color:var(--sk-ink); }
 .sk .sk-big { display:block; font-size:22px; font-weight:700; color:var(--sk-ink); margin-top:8px; font-variant-numeric:tabular-nums; }
 .sk .sk-step .sk-lesson { margin-top:8px; padding-top:8px; border-top:1px dashed var(--sk-line); font-size:13px; }
-.sk #pictures { display:grid; grid-template-columns:repeat(2, minmax(0, 340px)); gap:12px 16px; margin-top:12px; }
+.sk #pictures { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px 16px; margin-top:12px; }
 .sk #pictures figure { margin:0; }
-.sk #pictures .sk-wide { grid-column:1 / -1; max-width:696px; }
+.sk #pictures .sk-wide { grid-column:1 / -1; }
 @media (max-width:640px) { .sk #pictures { grid-template-columns:1fr; } }
-.sk #pictures img { display:block; max-width:100%; height:auto; border-radius:8px; border:1px solid var(--sk-line); background:#fff; }
-.sk #pictures figcaption { color:var(--sk-dim); font-size:13px; margin-top:6px; }
+.sk #pictures img { display:block; width:100%; height:auto; border-radius:8px; border:1px solid var(--sk-line); background:#fff; }
+.sk #pictures figcaption { color:var(--sk-dim); font-size:15px; margin-top:6px; }
 .sk .sk-diagram-wrap { overflow-x:auto; margin-top:12px; background:var(--sk-panel); border:1px solid var(--sk-line); border-radius:10px; padding:12px; }
 .sk .sk-diagram { display:block; width:100%; min-width:820px; height:auto; font-family:inherit; }
 .sk .sk-d-box { fill:var(--sk-panel); stroke:var(--sk-line); stroke-width:1.5; }
