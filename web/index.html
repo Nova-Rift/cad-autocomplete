@@ -37,6 +37,17 @@
   .bar { height:4px; background:var(--line); border-radius:2px; margin-top:3px; }
   .bar i { display:block; height:100%; background:var(--ghost); border-radius:2px; }
   .hint { color:var(--dim); font-size:13px; margin:0; }
+  .how { margin-top:28px; }
+  .how h2 { font-size:18px; margin:0 0 4px; }
+  .steps { display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:12px; margin-top:12px; }
+  .step { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .step .n { display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; font-weight:700; font-size:13px; margin-right:8px; }
+  .step h3 { display:inline; font-size:15px; margin:0; }
+  .step p { margin:8px 0 0; color:var(--dim); font-size:14px; }
+  .step .big { display:block; font-size:22px; font-weight:700; color:var(--ink); margin-top:8px; font-variant-numeric:tabular-nums; }
+  .step .lesson { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:13px; }
+  .step .lesson b { color:var(--ink); }
+  .how img { max-width:100%; border-radius:8px; border:1px solid var(--line); background:#fff; margin-top:12px; }
   .hint kbd, .keys kbd { font:12px ui-monospace, monospace; border:1px solid var(--line); border-radius:4px; padding:0 4px; }
   #status { color:var(--dim); font-size:13px; min-height:18px; margin-top:8px; }
 </style>
@@ -76,6 +87,46 @@
       </div>
     </div>
   </div>
+  <section class="how">
+    <h2>How this was made</h2>
+    <p class="sub" id="version" style="margin:0"></p>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><h3>Free drawings</h3>
+        <span class="big">9.2 million sketches</span>
+        <p>Real sketches people drew in a design tool, collected by Princeton researchers (SketchGraphs). Each one lists its shapes in the order they were drawn.</p>
+        <p class="lesson"><b>Lesson:</b> nobody marked anything by hand. The shape a person drew next <i>is</i> the right answer.</p></div>
+      <div class="step"><span class="n">2</span><h3>Drawings become numbers</h3>
+        <span class="big">line 12 16 52 16</span>
+        <p>A model only reads numbers. Each shape becomes its kind (line, circle, arc, point) plus its positions on a 64 × 64 grid. A sketch becomes a sentence, and the job becomes guessing the next word.</p></div>
+      <div class="step"><span class="n">3</span><h3>Cleaning</h3>
+        <span class="big">9.2 → 2.5 million</span>
+        <p>Most sketches were copies of each other, so only one of each was kept. Over a third of the test sketches also sat in the training pile and were taken out of the test.</p>
+        <p class="lesson"><b>Lesson:</b> a test the model has already seen flatters the score. Keep the test pile honest.</p></div>
+      <div class="step"><span class="n">4</span><h3>The model</h3>
+        <span class="big">4.8 million weights</span>
+        <p>A small model of the same family as chat AIs, written from scratch. It reads the shapes so far and scores every possible next number.</p></div>
+      <div class="step"><span class="n">5</span><h3>Training</h3>
+        <span class="big">1 rented GPU</span>
+        <p>The model guesses, gets corrected, and its weights are nudged, millions of times. Weight decay keeps the weights small, and the copy that does best on unseen sketches is the one kept.</p>
+        <p class="lesson"><b>Lesson:</b> watch two scores. A growing gap between seen and unseen sketches means memorising.</p></div>
+      <div class="step"><span class="n">6</span><h3>Scoring</h3>
+        <span class="big" id="score-big">still training</span>
+        <p id="score-text">When training ends, the model is tested on sketches it never saw: hide the next shape, ask for a guess, count how often it is right.</p>
+        <p class="lesson"><b>Lesson:</b> not just accuracy. Of the guesses shown, how many were right (precision)? Of all steps, how many got a right guess (recall)?</p></div>
+      <div class="step"><span class="n">7</span><h3>Into the browser</h3>
+        <span class="big">0.13 seconds a guess</span>
+        <p>The model was rewritten in plain JavaScript so it runs on this page with no server. It was checked against the GPU version and gives the same guesses.</p></div>
+      <div class="step"><span class="n">⚙</span><h3>The settings used</h3>
+        <p>Learning rate 0.001 (eased in over the first 1,000 steps, then slowly lowered) · 1,024 sketches per step · weight decay 0.05 · no dropout · 60,000 steps, about 24 passes over the data · 6 layers, 256 wide, 4 heads.</p>
+        <p class="lesson"><b>Honest note:</b> these were first picks from experience and they worked first time. Nothing was tuned yet, so there is likely a better score to find.</p></div>
+      <div class="step"><span class="n">!</span><h3>What did not work at first</h3>
+        <p><b>Too many helpers.</b> The cleaning step ran 96 helper programs on a machine with about 18 processors. They tripped over each other and it looked frozen. With 16 it took two minutes.</p>
+        <p><b>A silent wait.</b> That first run printed nothing, so there was no telling stuck from slow. It was restarted with progress messages.</p>
+        <p><b>Missing tools.</b> The rented machine lacked the file-copy tool and parts of the data reader; each was installed by hand.</p>
+        <p class="lesson"><b>Lesson:</b> make every long job say what it is doing.</p></div>
+    </div>
+    <div id="pictures"></div>
+  </section>
 </main>
 <script type="module" src="app.js"></script>
 </body>

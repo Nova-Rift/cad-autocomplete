@@ -202,6 +202,8 @@ render();
 loadModel('.').then(m => {
   model = m;
   document.getElementById('status').textContent = 'Ready. Draw, or pick a start on the right.';
+  const v = document.getElementById('version');
+  if (v) v.textContent = `This copy of the model had ${m.trainedSteps.toLocaleString()} training steps.`;
   const start = STARTERS[new URLSearchParams(location.search).get('start')];
   if (start) shapes = start.map(s => ({ type: s.type, c: s.c.slice() }));
   think();

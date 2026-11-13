@@ -27,6 +27,22 @@ model.load_state_dict(ck["state"])
 rows = np.load(f"{data}/test.npy")
 rng = np.random.default_rng(0)
 rows = rows[rng.permutation(len(rows))[:limit]]
+if len(sys.argv) > 5 and sys.argv[5] == "moved":
+    # Same test, but each sketch is shrunk and slid to a random spot, like a drawing that does not fill the page.
+    moved = np.zeros_like(rows)
+    for i, row in enumerate(rows):
+        s, (fx, fy) = rng.uniform(0.45, 1.0), rng.uniform(0, 1, 2)
+        ox, oy = fx * (1 - s) * (BINS - 1), fy * (1 - s) * (BINS - 1)
+        out = [BOS]
+        for t, c in split_entities(row):
+            if base_type(t) == CIRCLE:
+                c = [c[0] * s + ox, c[1] * s + oy, max(1, c[2] * s)]
+            else:
+                c = [v * s + (ox, oy)[j % 2] for j, v in enumerate(c)]
+            out += [t] + [COORD0 + int(min(BINS - 1, max(0, round(v)))) for v in c]
+        out.append(EOS)
+        moved[i, :len(out)] = out
+    rows = moved
 
 # one case per (sketch, number of shapes already drawn); group by prefix length so batches are rectangular
 cases = collections.defaultdict(list)

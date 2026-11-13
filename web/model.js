@@ -21,7 +21,9 @@ export function buildModel(manifest, buffer) {
   const all = halfToFloat(new Uint16Array(buffer));
   const w = {};
   for (const t of manifest.tensors) w[t.name] = all.subarray(t.offset, t.offset + t.shape.reduce((a, b) => a * b, 1));
-  return new Model(manifest.cfg, w);
+  const model = new Model(manifest.cfg, w);
+  model.trainedSteps = manifest.step;
+  return model;
 }
 
 export async function loadModel(base = '.') {
