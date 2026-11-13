@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sketch autocomplete</title>
+<style>
+  :root { --bg:#f6f7f9; --panel:#fff; --ink:#15181d; --dim:#69707c; --line:#d9dde3; --grid:#e9ecf0;
+          --shape:#15181d; --helper:#8a92a0; --ghost:#1769e0; --ghost-soft:#1769e022; --accent:#1769e0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#111317; --panel:#1a1d23; --ink:#eceef2; --dim:#99a1ad; --line:#2c313a; --grid:#22262d;
+            --shape:#eceef2; --helper:#7d8592; --ghost:#5aa2ff; --ghost-soft:#5aa2ff26; --accent:#5aa2ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.4 system-ui, sans-serif; }
+  main { max-width:1040px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:22px; margin:0 0 2px; }
+  .sub { color:var(--dim); margin:0 0 14px; }
+  .wrap { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
+  .stage { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:10px; }
+  canvas { display:block; width:640px; max-width:calc(100vw - 54px); aspect-ratio:1; cursor:crosshair; border-radius:6px; touch-action:none; }
+  .side { flex:1; min-width:260px; display:flex; flex-direction:column; gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; }
+  .card h2 { font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin:0 0 8px; }
+  .tools { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  button { font:inherit; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:8px; padding:7px 6px; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button kbd { opacity:.65; font:11px ui-monospace, monospace; margin-left:4px; }
+  .row { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+  .row button { flex:1; }
+  .sug { display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin-bottom:6px; padding:6px 8px; }
+  .sug.on { background:var(--ghost-soft); border-color:var(--ghost); color:var(--ink); }
+  .sug canvas { width:44px; height:44px; cursor:pointer; flex:none; }
+  .sug b { font-weight:600; }
+  .sug .pct { margin-left:auto; color:var(--dim); font-variant-numeric:tabular-nums; }
+  .bar { height:4px; background:var(--line); border-radius:2px; margin-top:3px; }
+  .bar i { display:block; height:100%; background:var(--ghost); border-radius:2px; }
+  .hint { color:var(--dim); font-size:13px; margin:0; }
+  .hint kbd, .keys kbd { font:12px ui-monospace, monospace; border:1px solid var(--line); border-radius:4px; padding:0 4px; }
+  #status { color:var(--dim); font-size:13px; min-height:18px; margin-top:8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sketch autocomplete</h1>
+  <p class="sub">Draw a shape. The blue dashed shape is the model's guess at what you'll draw next. Press <b>Tab</b> to take it.</p>
+  <div class="wrap">
+    <div class="stage">
+      <canvas id="board" width="1280" height="1280"></canvas>
+      <div id="status">Loading the model…</div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2>Draw</h2>
+        <div class="tools" id="tools">
+          <button data-tool="line">Line<kbd>L</kbd></button>
+          <button data-tool="circle">Circle<kbd>C</kbd></button>
+          <button data-tool="arc">Arc<kbd>A</kbd></button>
+          <button data-tool="point">Point<kbd>P</kbd></button>
+        </div>
+        <div class="row">
+          <button id="helper">Helper line<kbd>X</kbd></button>
+          <button id="undo">Undo<kbd>Z</kbd></button>
+          <button id="clear">Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Next shape guesses</h2>
+        <div id="suggestions"><p class="hint">Draw something to get a guess.</p></div>
+        <p class="hint keys"><kbd>Tab</kbd> take it · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pick another · <kbd>Esc</kbd> stop drawing</p>
+      </div>
+      <div class="card">
+        <h2>Start from</h2>
+        <div class="row" id="starters" style="margin-top:0"></div>
+      </div>
+    </div>
+  </div>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

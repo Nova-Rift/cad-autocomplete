@@ -1,0 +1,4 @@
+.export/
+__pycache__/
+node_modules/
+*.pt
