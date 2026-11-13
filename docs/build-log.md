@@ -49,6 +49,10 @@ Everything done on this project, in order, so it can be explained on the page (w
     point; for an arc also the end), so the guesses finish that shape (model.js `suggest(tokens, width, forced)`).
 15. **Cost.** Pod rented 1.85 hours at $0.89: about $1.64. Pod deleted.
 
+16. **Page as a showcase.** Clark: the page is a project to show people, so the study-guide parts ("Lesson" labels, a
+    "what a project like this takes" section, the name of the book being studied) were removed. The system design sits
+    above "How this was made". Results, pictures and a "Not done yet" note were added with the finished model.
+
 ## Things that went wrong
 - The pod image lacked rsync and the data reader's extras (matplotlib, lz4); installed by hand.
 - prep.py first used 96 worker processes because the machine reports 128 processors, but the pod only gets about 18.
