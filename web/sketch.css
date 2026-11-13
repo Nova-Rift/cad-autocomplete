@@ -45,12 +45,20 @@ html[data-theme="dark"] .sk { --sk-panel:#2c2739; --sk-ink:#eee9f5; --sk-dim:#bf
 .sk .sk-big { display:block; font-size:22px; font-weight:700; color:var(--sk-ink); margin-top:8px; font-variant-numeric:tabular-nums; }
 .sk .sk-step .sk-lesson { margin-top:8px; padding-top:8px; border-top:1px dashed var(--sk-line); font-size:13px; }
 .sk #pictures img { max-width:100%; border-radius:8px; border:1px solid var(--sk-line); background:#fff; margin-top:12px; }
-.sk .sk-design { margin-top:12px; }
-.sk .sk-flow { display:grid; grid-template-columns:repeat(auto-fit, minmax(128px, 1fr)); gap:22px; margin-top:12px; }
-.sk .sk-flow > div { position:relative; border:1px solid var(--sk-line); border-radius:8px; padding:10px; font-size:13px; line-height:1.4; color:var(--sk-dim); }
-.sk .sk-flow > div b { display:block; color:var(--sk-ink); font-size:14px; margin-bottom:4px; }
-.sk .sk-flow > div + div::before { content:"→"; position:absolute; left:-18px; top:50%; transform:translateY(-50%); color:var(--sk-accent); font-weight:700; }
-.sk .sk-flow > .sk-later { border-style:dashed; }
+.sk .sk-diagram-wrap { overflow-x:auto; margin-top:12px; background:var(--sk-panel); border:1px solid var(--sk-line); border-radius:10px; padding:12px; }
+.sk .sk-diagram { display:block; width:100%; min-width:820px; height:auto; font-family:inherit; }
+.sk .sk-d-box { fill:var(--sk-panel); stroke:var(--sk-line); stroke-width:1.5; }
+.sk .sk-d-live { stroke:var(--sk-accent); stroke-width:2.5; }
+.sk .sk-d-store { fill:var(--sk-ghost-soft); stroke:var(--sk-line); stroke-width:1.5; }
+.sk .sk-d-t { fill:var(--sk-ink); font-size:14px; font-weight:700; text-anchor:middle; }
+.sk .sk-d-s { fill:var(--sk-dim); font-size:11.5px; text-anchor:middle; }
+.sk .sk-d-row { fill:var(--sk-dim); font-size:11px; font-weight:700; letter-spacing:.08em; }
+.sk .sk-d-a { fill:none; stroke:var(--sk-accent); stroke-width:2; }
+.sk .sk-d-head { fill:var(--sk-accent); }
+.sk .sk-d-later { stroke:var(--sk-dim); stroke-dasharray:6 5; stroke-width:1.5; }
+.sk .sk-d-head-dim { fill:var(--sk-dim); }
+.sk .sk-d-lab { fill:var(--sk-accent); font-size:12px; font-weight:600; }
+.sk .sk-d-lab-later { fill:var(--sk-dim); font-weight:400; font-style:italic; }
 /* Only the stand-alone page (web/index.html) uses these. */
 body.sk-alone { margin:0; background:#f5f3ec; font-family:system-ui, sans-serif; }
 @media (prefers-color-scheme: dark) { body.sk-alone { background:#221d2c; color:#eee9f5; } }
