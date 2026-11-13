@@ -113,14 +113,16 @@ for s in ("top", "right"):
 fig.tight_layout(); fig.savefig(f"{out}/precision_recall.png", dpi=110); plt.close(fig)
 
 # ---- training curves ----
+# Both lines are measured on shrunk-and-shifted sketches, as the model is trained (val_loss_moved), so they compare like with like.
 log = [e for e in json.load(open(f"{run}/log.json")) if e["train_loss"] is not None]
+key = "val_loss_moved" if "val_loss_moved" in log[0] else "val_loss"
 fig, ax = plt.subplots(figsize=(7, 3.6))
 ax.plot([e["step"] for e in log], [e["train_loss"] for e in log], color=INK, lw=2.5)
-ax.plot([e["step"] for e in log], [e["val_loss"] for e in log], color=BLUE, lw=2.5)
-ax.text(log[-1]["step"], log[-1]["train_loss"] - 0.012, "training sketches", color=INK, ha="right", va="top", fontsize=11, weight="bold")
-ax.text(log[-1]["step"], log[-1]["val_loss"] + 0.012, "unseen sketches", color=BLUE, ha="right", va="bottom", fontsize=11, weight="bold")
+ax.plot([e["step"] for e in log], [e[key] for e in log], color=BLUE, lw=2.5)
+ax.text(log[-1]["step"], log[-1]["train_loss"] - 0.02, "training sketches", color=INK, ha="right", va="top", fontsize=11, weight="bold")
+ax.text(log[-1]["step"], log[-1][key] + 0.03, "unseen sketches", color=BLUE, ha="right", va="bottom", fontsize=11, weight="bold")
 ax.set_xlabel("training steps"); ax.set_ylabel("error (lower is better)")
-lo = min(min(e["train_loss"], e["val_loss"]) for e in log)
+lo = min(min(e["train_loss"], e[key]) for e in log)
 ax.set_ylim(lo - 0.08, lo + 0.5)
 for s in ("top", "right"):
     ax.spines[s].set_visible(False)

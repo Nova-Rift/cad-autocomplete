@@ -1,0 +1,20 @@
+{
+ "train": {
+  "sketches_in_file": 9179789,
+  "usable": 7055701,
+  "distinct": 2512441,
+  "kept": 2512441
+ },
+ "validation": {
+  "sketches_in_file": 315228,
+  "usable": 243092,
+  "distinct": 123394,
+  "kept": 77699
+ },
+ "test": {
+  "sketches_in_file": 313271,
+  "usable": 241558,
+  "distinct": 121797,
+  "kept": 76694
+ }
+}

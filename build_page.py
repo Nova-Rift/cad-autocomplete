@@ -17,7 +17,7 @@ web.joinpath("index.html").write_text(f"""<!doctype html>
 <main>
 <h1>Sketch autocomplete</h1>
 <p class="sk-lead">{LEAD}</p>
-{web.joinpath("body.html").read_text()}</main>
+{web.joinpath("body.html").read_text().replace('src="/sketch/', 'src="')}</main>
 <script type="module" src="app.js"></script>
 </body>
 </html>
