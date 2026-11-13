@@ -59,6 +59,9 @@ Everything done on this project, in order, so it can be explained on the page (w
     test cases where the model was at least 50% sure (it is right on 77% of those; 7 of the 8 shown matched), and the
     caption says so. The overall 43% stays on the score bars.
 
+18. **Bigger results, public code.** The charts were too small to read: they now fill the page width with larger text.
+    The repo was made public and the page links to it at the top.
+
 ## Things that went wrong
 - The pod image lacked rsync and the data reader's extras (matplotlib, lz4); installed by hand.
 - prep.py first used 96 worker processes because the machine reports 128 processors, but the pod only gets about 18.

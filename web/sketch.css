@@ -78,3 +78,6 @@ body.sk-alone { margin:0; background:#f5f3ec; font-family:system-ui, sans-serif;
 .sk-alone main { max-width:1040px; margin:0 auto; padding:20px 16px 40px; }
 .sk-alone h1 { font-size:22px; margin:0 0 2px; }
 .sk-alone .sk-lead { opacity:.75; margin:0 0 14px; }
+.sk .sk-source { margin:0 0 12px; font-size:15px; }
+.sk .sk-source a { display:inline-block; padding:6px 12px; border:1px solid var(--sk-line); border-radius:999px; background:var(--sk-panel); color:var(--sk-accent); font-weight:700; text-decoration:none; }
+.sk .sk-source a:hover { border-color:var(--sk-accent); }
