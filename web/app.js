@@ -4,7 +4,7 @@ import { loadModel, BOS, EOS, LINE, CIRCLE, ARC, POINT, CONSTRUCTION, COORD0, BI
 const board = document.getElementById('board'), ctx = board.getContext('2d');
 const SIZE = board.width, CELL = SIZE / BINS;
 const px = v => (v + 0.5) * CELL, py = v => (BINS - 1 - v + 0.5) * CELL;
-const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const css = name => getComputedStyle(board).getPropertyValue(name.replace('--', '--sk-')).trim();
 const NAME = { [LINE]: 'Line', [CIRCLE]: 'Circle', [ARC]: 'Arc', [POINT]: 'Point' };
 
 let model = null, shapes = [], tool = 'line', helper = false, clicks = [], mouse = null;
@@ -95,21 +95,21 @@ function renderGuesses() {
   const box = document.getElementById('suggestions');
   box.textContent = '';
   if (!guesses.length) {
-    box.innerHTML = `<p class="hint">${shapes.length >= MAX_SHAPES ? 'That is the most shapes the model was trained on (16).' : 'Draw something to get a guess.'}</p>`;
+    box.innerHTML = `<p class="sk-hint">${shapes.length >= MAX_SHAPES ? 'That is the most shapes the model was trained on (16).' : 'Draw something to get a guess.'}</p>`;
     return;
   }
   guesses.slice(0, 3).forEach((g, i) => {
     const b = document.createElement('button');
-    b.className = 'sug' + (i === chosen ? ' on' : '');
+    b.className = 'sk-sug' + (i === chosen ? ' on' : '');
     const mini = document.createElement('canvas'); mini.width = mini.height = 88;
     const m = mini.getContext('2d'), u = 88 / BINS, mx = v => (v + 0.5) * u, my = v => (BINS - 1 - v + 0.5) * u;
     for (const s of shapes) paintShape(m, s, css('--helper'), { mapX: mx, mapY: my, unit: u, width: 1.5 });
     if (g.shape) paintShape(m, g.shape, css('--ghost'), { mapX: mx, mapY: my, unit: u, width: 3 });
     const label = g.shape ? `${isConstruction(g.shape.type) ? 'Helper ' : ''}${NAME[baseType(g.shape.type)]}`.replace('Helper L', 'Helper l').replace('Helper C', 'Helper c').replace('Helper A', 'Helper a').replace('Helper P', 'Helper p') : 'Looks finished';
     const text = document.createElement('div'); text.style.flex = '1';
-    text.innerHTML = `<div style="display:flex"><b>${i + 1} · ${label}</b><span class="pct">${Math.round(g.p * 100)}%</span></div><div class="bar"><i style="width:${Math.round(g.p * 100)}%"></i></div>`;
+    text.innerHTML = `<div style="display:flex"><b>${i + 1} · ${label}</b><span class="sk-pct">${Math.round(g.p * 100)}%</span></div><div class="sk-bar"><i style="width:${Math.round(g.p * 100)}%"></i></div>`;
     b.append(mini, text);
-    b.onmouseenter = () => { chosen = i; render(); for (const [j, el] of [...box.querySelectorAll('.sug')].entries()) el.classList.toggle('on', j === i); };
+    b.onmouseenter = () => { chosen = i; render(); for (const [j, el] of [...box.querySelectorAll('.sk-sug')].entries()) el.classList.toggle('on', j === i); };
     b.onclick = () => { chosen = i; accept(); };
     box.append(b);
   });
@@ -176,8 +176,11 @@ document.getElementById('clear').onclick = () => { shapes = []; clicks = []; thi
 
 addEventListener('keydown', ev => {
   if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const at = document.activeElement, typing = at && /^(input|textarea|select)$/i.test(at.tagName);
+  const ours = !at || at === document.body || !!at.closest('.sk');      // leave Tab alone in the site's own menus
+  if (typing) return;
   const k = ev.key.toLowerCase();
-  if (k === 'tab') { ev.preventDefault(); clicks = []; accept(); }
+  if (k === 'tab') { if (!ours || !guesses[chosen] || !guesses[chosen].shape) return; ev.preventDefault(); clicks = []; accept(); }
   else if (k === 'escape') { clicks = []; render(); }
   else if (k === 'l') setTool('line'); else if (k === 'c') setTool('circle');
   else if (k === 'a') setTool('arc'); else if (k === 'p') setTool('point');
@@ -199,7 +202,7 @@ for (const [name, list] of Object.entries(STARTERS)) {
 
 setTool('line');
 render();
-loadModel('.').then(m => {
+loadModel(new URL('.', import.meta.url).href.replace(/\/$/, '')).then(m => {
   model = m;
   document.getElementById('status').textContent = 'Ready. Draw, or pick a start on the right.';
   const v = document.getElementById('version');
@@ -209,3 +212,4 @@ loadModel('.').then(m => {
   think();
 }).catch(err => { document.getElementById('status').textContent = 'Could not load the model: ' + err.message; });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { render(); renderGuesses(); });
+new MutationObserver(() => { render(); renderGuesses(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

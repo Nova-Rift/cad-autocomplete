@@ -4,129 +4,111 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sketch autocomplete</title>
-<style>
-  :root { --bg:#f6f7f9; --panel:#fff; --ink:#15181d; --dim:#69707c; --line:#d9dde3; --grid:#e9ecf0;
-          --shape:#15181d; --helper:#8a92a0; --ghost:#1769e0; --ghost-soft:#1769e022; --accent:#1769e0; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#111317; --panel:#1a1d23; --ink:#eceef2; --dim:#99a1ad; --line:#2c313a; --grid:#22262d;
-            --shape:#eceef2; --helper:#7d8592; --ghost:#5aa2ff; --ghost-soft:#5aa2ff26; --accent:#5aa2ff; }
-  }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.4 system-ui, sans-serif; }
-  main { max-width:1040px; margin:0 auto; padding:20px 16px 40px; }
-  h1 { font-size:22px; margin:0 0 2px; }
-  .sub { color:var(--dim); margin:0 0 14px; }
-  .wrap { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
-  .stage { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:10px; }
-  canvas { display:block; width:640px; max-width:calc(100vw - 54px); aspect-ratio:1; cursor:crosshair; border-radius:6px; touch-action:none; }
-  .side { flex:1; min-width:260px; display:flex; flex-direction:column; gap:12px; }
-  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; }
-  .card h2 { font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin:0 0 8px; }
-  .tools { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-  button { font:inherit; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:8px; padding:7px 6px; cursor:pointer; }
-  button:hover { border-color:var(--accent); }
-  button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
-  button kbd { opacity:.65; font:11px ui-monospace, monospace; margin-left:4px; }
-  .row { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
-  .row button { flex:1; }
-  .sug { display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin-bottom:6px; padding:6px 8px; }
-  .sug.on { background:var(--ghost-soft); border-color:var(--ghost); color:var(--ink); }
-  .sug canvas { width:44px; height:44px; cursor:pointer; flex:none; }
-  .sug b { font-weight:600; }
-  .sug .pct { margin-left:auto; color:var(--dim); font-variant-numeric:tabular-nums; }
-  .bar { height:4px; background:var(--line); border-radius:2px; margin-top:3px; }
-  .bar i { display:block; height:100%; background:var(--ghost); border-radius:2px; }
-  .hint { color:var(--dim); font-size:13px; margin:0; }
-  .how { margin-top:28px; }
-  .how h2 { font-size:18px; margin:0 0 4px; }
-  .steps { display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:12px; margin-top:12px; }
-  .step { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
-  .step .n { display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; font-weight:700; font-size:13px; margin-right:8px; }
-  .step h3 { display:inline; font-size:15px; margin:0; }
-  .step p { margin:8px 0 0; color:var(--dim); font-size:14px; }
-  .step .big { display:block; font-size:22px; font-weight:700; color:var(--ink); margin-top:8px; font-variant-numeric:tabular-nums; }
-  .step .lesson { margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:13px; }
-  .step .lesson b { color:var(--ink); }
-  .how img { max-width:100%; border-radius:8px; border:1px solid var(--line); background:#fff; margin-top:12px; }
-  .hint kbd, .keys kbd { font:12px ui-monospace, monospace; border:1px solid var(--line); border-radius:4px; padding:0 4px; }
-  #status { color:var(--dim); font-size:13px; min-height:18px; margin-top:8px; }
-</style>
+<link rel="stylesheet" href="sketch.css">
 </head>
-<body>
+<body class="sk-alone">
 <main>
-  <h1>Sketch autocomplete</h1>
-  <p class="sub">Draw a shape. The blue dashed shape is the model's guess at what you'll draw next. Press <b>Tab</b> to take it.</p>
-  <div class="wrap">
-    <div class="stage">
+<h1>Sketch autocomplete</h1>
+<p class="sk-lead">Draw a shape. The blue dashed shape is the model's guess at what you'll draw next. Press <b>Tab</b> to take it.</p>
+<div class="sk">
+  <div class="sk-wrap">
+    <div class="sk-stage">
       <canvas id="board" width="1280" height="1280"></canvas>
       <div id="status">Loading the model…</div>
     </div>
-    <div class="side">
-      <div class="card">
+    <div class="sk-side">
+      <div class="sk-card">
         <h2>Draw</h2>
-        <div class="tools" id="tools">
+        <div class="sk-tools" id="tools">
           <button data-tool="line">Line<kbd>L</kbd></button>
           <button data-tool="circle">Circle<kbd>C</kbd></button>
           <button data-tool="arc">Arc<kbd>A</kbd></button>
           <button data-tool="point">Point<kbd>P</kbd></button>
         </div>
-        <div class="row">
+        <div class="sk-row">
           <button id="helper">Helper line<kbd>X</kbd></button>
           <button id="undo">Undo<kbd>Z</kbd></button>
           <button id="clear">Clear</button>
         </div>
       </div>
-      <div class="card">
+      <div class="sk-card">
         <h2>Next shape guesses</h2>
-        <div id="suggestions"><p class="hint">Draw something to get a guess.</p></div>
-        <p class="hint keys"><kbd>Tab</kbd> take it · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pick another · <kbd>Esc</kbd> stop drawing</p>
+        <div id="suggestions"><p class="sk-hint">Draw something to get a guess.</p></div>
+        <p class="sk-hint sk-keys"><kbd>Tab</kbd> take it · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> pick another · <kbd>Esc</kbd> stop drawing</p>
       </div>
-      <div class="card">
+      <div class="sk-card">
         <h2>Start from</h2>
-        <div class="row" id="starters" style="margin-top:0"></div>
+        <div class="sk-row" id="starters" style="margin-top:0"></div>
       </div>
     </div>
   </div>
-  <section class="how">
-    <h2>How this was made</h2>
-    <p class="sub" id="version" style="margin:0"></p>
-    <div class="steps">
-      <div class="step"><span class="n">1</span><h3>Free drawings</h3>
-        <span class="big">9.2 million sketches</span>
+  <section class="sk-how">
+    <h2 class="sk-how-title">How this was made</h2>
+    <p class="sk-sub" id="version" style="margin:0"></p>
+    <div class="sk-steps">
+      <div class="sk-step"><span class="sk-n">1</span><h3>Free drawings</h3>
+        <span class="sk-big">9.2 million sketches</span>
         <p>Real sketches people drew in a design tool, collected by Princeton researchers (SketchGraphs). Each one lists its shapes in the order they were drawn.</p>
-        <p class="lesson"><b>Lesson:</b> nobody marked anything by hand. The shape a person drew next <i>is</i> the right answer.</p></div>
-      <div class="step"><span class="n">2</span><h3>Drawings become numbers</h3>
-        <span class="big">line 12 16 52 16</span>
+        <p class="sk-lesson"><b>Lesson:</b> nobody marked anything by hand. The shape a person drew next <i>is</i> the right answer.</p></div>
+      <div class="sk-step"><span class="sk-n">2</span><h3>Drawings become numbers</h3>
+        <span class="sk-big">line 12 16 52 16</span>
         <p>A model only reads numbers. Each shape becomes its kind (line, circle, arc, point) plus its positions on a 64 × 64 grid. A sketch becomes a sentence, and the job becomes guessing the next word.</p></div>
-      <div class="step"><span class="n">3</span><h3>Cleaning</h3>
-        <span class="big">9.2 → 2.5 million</span>
+      <div class="sk-step"><span class="sk-n">3</span><h3>Cleaning</h3>
+        <span class="sk-big">9.2 → 2.5 million</span>
         <p>Most sketches were copies of each other, so only one of each was kept. Over a third of the test sketches also sat in the training pile and were taken out of the test.</p>
-        <p class="lesson"><b>Lesson:</b> a test the model has already seen flatters the score. Keep the test pile honest.</p></div>
-      <div class="step"><span class="n">4</span><h3>The model</h3>
-        <span class="big">4.8 million weights</span>
+        <p class="sk-lesson"><b>Lesson:</b> a test the model has already seen flatters the score. Keep the test pile honest.</p></div>
+      <div class="sk-step"><span class="sk-n">4</span><h3>The model</h3>
+        <span class="sk-big">4.8 million weights</span>
         <p>A small model of the same family as chat AIs, written from scratch. It reads the shapes so far and scores every possible next number.</p></div>
-      <div class="step"><span class="n">5</span><h3>Training</h3>
-        <span class="big">1 rented GPU</span>
+      <div class="sk-step"><span class="sk-n">5</span><h3>Training</h3>
+        <span class="sk-big">1 rented GPU</span>
         <p>The model guesses, gets corrected, and its weights are nudged, millions of times. Weight decay keeps the weights small, and the copy that does best on unseen sketches is the one kept.</p>
-        <p class="lesson"><b>Lesson:</b> watch two scores. A growing gap between seen and unseen sketches means memorising.</p></div>
-      <div class="step"><span class="n">6</span><h3>Scoring</h3>
-        <span class="big" id="score-big">still training</span>
+        <p class="sk-lesson"><b>Lesson:</b> watch two scores. A growing gap between seen and unseen sketches means memorising.</p></div>
+      <div class="sk-step"><span class="sk-n">6</span><h3>Scoring</h3>
+        <span class="sk-big" id="score-big">still training</span>
         <p id="score-text">When training ends, the model is tested on sketches it never saw: hide the next shape, ask for a guess, count how often it is right.</p>
-        <p class="lesson"><b>Lesson:</b> not just accuracy. Of the guesses shown, how many were right (precision)? Of all steps, how many got a right guess (recall)?</p></div>
-      <div class="step"><span class="n">7</span><h3>Into the browser</h3>
-        <span class="big">0.13 seconds a guess</span>
+        <p class="sk-lesson"><b>Lesson:</b> not just accuracy. Of the guesses shown, how many were right (precision)? Of all steps, how many got a right guess (recall)?</p></div>
+      <div class="sk-step"><span class="sk-n">7</span><h3>Into the browser</h3>
+        <span class="sk-big">0.13 seconds a guess</span>
         <p>The model was rewritten in plain JavaScript so it runs on this page with no server. It was checked against the GPU version and gives the same guesses.</p></div>
-      <div class="step"><span class="n">⚙</span><h3>The settings used</h3>
+      <div class="sk-step"><span class="sk-n">⚙</span><h3>The settings used</h3>
         <p>Learning rate 0.001 (eased in over the first 1,000 steps, then slowly lowered) · 1,024 sketches per step · weight decay 0.05 · no dropout · 60,000 steps, about 24 passes over the data · 6 layers, 256 wide, 4 heads.</p>
-        <p class="lesson"><b>Honest note:</b> these were first picks from experience and they worked first time. Nothing was tuned yet, so there is likely a better score to find.</p></div>
-      <div class="step"><span class="n">!</span><h3>What did not work at first</h3>
+        <p class="sk-lesson"><b>Honest note:</b> these were first picks from experience and they worked first time. Nothing was tuned yet, so there is likely a better score to find.</p></div>
+      <div class="sk-step"><span class="sk-n">!</span><h3>What did not work at first</h3>
         <p><b>Too many helpers.</b> The cleaning step ran 96 helper programs on a machine with about 18 processors. They tripped over each other and it looked frozen. With 16 it took two minutes.</p>
         <p><b>A silent wait.</b> That first run printed nothing, so there was no telling stuck from slow. It was restarted with progress messages.</p>
         <p><b>Missing tools.</b> The rented machine lacked the file-copy tool and parts of the data reader; each was installed by hand.</p>
-        <p class="lesson"><b>Lesson:</b> make every long job say what it is doing.</p></div>
+        <p class="sk-lesson"><b>Lesson:</b> make every long job say what it is doing.</p></div>
     </div>
+    <h2 class="sk-how-title" style="margin-top:28px">The same project, as an interview book's five parts</h2>
+    <p class="sk-sub" style="margin:0">This was built while studying <i>Inside the Machine Learning Interview</i> by Peng Shao. Its five parts, and where each one shows up here.</p>
+    <div class="sk-steps">
+      <div class="sk-step"><span class="sk-n">1</span><h3>The basics</h3>
+        <p>Telling memorising from too weak by comparing two scores. Keeping the test pile honest. Precision and recall instead of plain accuracy. Weight decay.</p>
+        <p class="sk-lesson"><b>Here:</b> cleaning, training and scoring (steps 3, 5, 6).</p></div>
+      <div class="sk-step"><span class="sk-n">2</span><h3>Coding</h3>
+        <p>Writing the pieces yourself rather than calling a library: the model, the training loop, the search for the best few guesses.</p>
+        <p class="sk-lesson"><b>Here:</b> the model is written out twice, once for the GPU and once in plain JavaScript for this page.</p></div>
+      <div class="sk-step"><span class="sk-n">4</span><h3>Infrastructure</h3>
+        <p>The machinery around the model: where it trains, where its saved copies go, how it reaches people.</p>
+        <p class="sk-lesson"><b>Here:</b> one rented GPU with a spending cap, saved copies sent to cloud storage every 2,000 steps, and a check that the page's model matches the GPU's.</p></div>
+      <div class="sk-step"><span class="sk-n">5</span><h3>Advanced questions</h3>
+        <p>What goes wrong in real systems. The big one here: the model was trained on sketches that always fill the page, but people do not draw that way.</p>
+        <p class="sk-lesson"><b>Here:</b> training sketches are now shrunk and shifted at random so practice looks like real use.</p></div>
+    </div>
+    <div class="sk-step sk-design"><span class="sk-n">3</span><h3>System design: “design autocomplete for a drawing tool”</h3>
+      <div class="sk-flow">
+        <div><b>Goal</b>Guess the next shape. Success = people take the guess.</div>
+        <div><b>Data</b>9.2 million public sketches. The next shape drawn is the answer.</div>
+        <div><b>Numbers</b>Each shape: its kind plus grid positions.</div>
+        <div><b>Model</b>Small next-word model, 4.8 million weights.</div>
+        <div><b>Test</b>Unseen sketches. Precision and recall.</div>
+        <div><b>Serve</b>Runs in the browser. 0.13 seconds, no server.</div>
+        <div class="sk-later"><b>After launch</b>Not built: record each Tab or ignore, retrain on it.</div>
+      </div></div>
     <div id="pictures"></div>
   </section>
+</div>
 </main>
 <script type="module" src="app.js"></script>
 </body>
