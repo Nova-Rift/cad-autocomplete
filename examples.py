@@ -1,10 +1,11 @@
 """Picture of example guesses for the page and the README.
 
-    python examples.py TOKENS_DIR RUN_DIR/best.pt docs/examples.png [min_confidence=0.5] [count=8]
+    python examples.py TOKENS_DIR RUN_DIR/best.pt docs/examples.png [min_confidence=0.5] [count=9]
 
 Takes test sketches in a random order, hides the next shape at a random point, and keeps the first `count` cases where the
 model's top guess had at least `min_confidence` probability: the cases an autocomplete that only speaks up when sure would
-show. Each panel: the sketch so far (black), the guess (dashed blue), and, when the guess was wrong, what the person drew (red).
+show. Each example is two panels on the sketch so far (black): the guess (dashed blue), and beside it what the person
+really drew (green when it is the same shape, red when it is not).
 """
 import sys
 import numpy as np, torch
@@ -18,7 +19,7 @@ from tokens import *
 
 data, ckpt, out = sys.argv[1:4]
 bar = float(sys.argv[4]) if len(sys.argv) > 4 else 0.5
-count = int(sys.argv[5]) if len(sys.argv) > 5 else 8
+count = int(sys.argv[5]) if len(sys.argv) > 5 else 9
 INK, HELP, BLUE, GREEN, RED = "#15181d", "#9aa1ad", "#1769e0", "#1a9a55", "#d43d3d"
 dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -76,18 +77,28 @@ for row in rows[rng.permutation(len(rows))]:
     picks.append((ents, k, got, ok, p))
     if len(picks) == count:
         break
-cols = count // 2
-fig, axes = plt.subplots(2, cols, figsize=(3.1 * cols, 6.6))
-for ax, (ents, k, got, ok, p) in zip(axes.flat, picks):
+# Each example is a pair of panels: the model's guess on the left, what the person really drew on the right.
+per_row = 3
+n_rows = -(-len(picks) // per_row)
+fig = plt.figure(figsize=(4.6 * per_row, 2.55 * n_rows))
+grid = fig.add_gridspec(n_rows, per_row * 3 - 1, width_ratios=([1, 1, 0.22] * per_row)[:-1])
+
+
+def panel(ax, ents, k, shape, color, ghost, title, title_color):
     ax.set_xlim(-3, 66); ax.set_ylim(-3, 66); ax.set_aspect("equal"); ax.set_xticks([]); ax.set_yticks([])
     for s in ax.spines.values():
         s.set_color("#d9dde3")
     for e in ents[:k]:
         draw(ax, e, HELP if e[0] > POINT else INK)
-    if not ok:
-        draw(ax, ents[k], RED, lw=3)
-    draw(ax, got, BLUE, lw=3.5, ghost=True)
-    ax.set_title("✓ guess matched" if ok else "✗ person drew the red shape", fontsize=12, color=GREEN if ok else RED, weight="bold")
+    draw(ax, shape, color, lw=3.5, ghost=ghost)
+    ax.set_title(title, fontsize=13, color=title_color, weight="bold")
+
+
+for i, (ents, k, got, ok, p) in enumerate(picks):
+    r, c = divmod(i, per_row)
+    panel(fig.add_subplot(grid[r, c * 3]), ents, k, got, BLUE, True, "Model's guess", BLUE)
+    panel(fig.add_subplot(grid[r, c * 3 + 1]), ents, k, ents[k], GREEN if ok else RED, False,
+          "Person drew  ✓ same" if ok else "Person drew  ✗ different", GREEN if ok else RED)
 fig.tight_layout()
 fig.savefig(out, dpi=110); plt.close(fig)
 print(f"{right} of {len(picks)} shown guesses matched; {len(picks)} kept out of {tried} cases tried (bar {bar})")

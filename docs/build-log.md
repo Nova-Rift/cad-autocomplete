@@ -66,6 +66,9 @@ Everything done on this project, in order, so it can be explained on the page (w
     of attention and a small network → scores → next number, looped), and the "same family as chat AIs" line reworded
     in plain words.
 
+20. **Guess and truth side by side.** Clark: when a guess matched, the picture showed only one shape. Each example is
+    now a pair of panels: the model's guess, then what the person really drew (nine examples, 8 matched).
+
 ## Things that went wrong
 - The pod image lacked rsync and the data reader's extras (matplotlib, lz4); installed by hand.
 - prep.py first used 96 worker processes because the machine reports 128 processors, but the pod only gets about 18.
